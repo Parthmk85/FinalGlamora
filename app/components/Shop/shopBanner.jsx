@@ -2,6 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 const ShopBanner = () => {
     return (
@@ -16,8 +17,12 @@ const ShopBanner = () => {
             </nav>
 
             {/* Main Banner */}
-            <div 
-                className="relative w-full bg-[#d3d3d3] overflow-x-hidden overflow-y-visible rounded-l-2xl sm:rounded-l-3xl rounded-r-3xl sm:rounded-r-4xl shadow-lg min-h-[200px] sm:min-h-[210px] md:min-h-[220px]"
+            <motion.div 
+                initial={{ opacity: 0, x: -100 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="relative w-full bg-[#f5f5f5] overflow-x-hidden overflow-y-visible rounded-l-2xl sm:rounded-l-3xl rounded-r-3xl sm:rounded-r-4xl shadow-lg min-h-[200px] sm:min-h-[210px] md:min-h-[220px]"
               
             >
                 <div className="relative flex flex-col md:flex-row items-center md:items-stretch h-full z-10 min-h-[200px] sm:min-h-[210px] md:min-h-[220px]">
@@ -41,7 +46,7 @@ const ShopBanner = () => {
                     {/* Right Side - Girl Image - Peaking 40-50px above banner */}
                     
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };

@@ -17,25 +17,19 @@ const Footer = ({ data }) => {
     columns: {
       GENERAL: [
         { name: "About Us", link: "/about" },
-        { name: "Blog", link: "/blog" },
-        { name: "How it Works", link: "/how-it-works" },
         { name: "Contact Us", link: "/contact" },
       ],
       PRODUCTS: [
-        { name: "Men Fashion", link: "/men" },
         { name: "Women Fashion", link: "/women" },
         { name: "Shoes & Bag", link: "/shoes-bags" },
         { name: "Accessories", link: "/accessories" },
       ],
       "CUSTOMER SERVICE": [
-        { name: "FAQ", link: "/faq" },
         { name: "Help & Support", link: "/support" },
-        { name: "Billing Cycle", link: "/billing" },
         { name: "Privacy Policy", link: "/privacy" },
       ],
       "SOCIAL MEDIA": [
         { name: "Instagram", link: "https://instagram.com" },
-        { name: "Tiktok", link: "https://tiktok.com" },
         { name: "Facebook", link: "https://facebook.com" },
         { name: "YouTube", link: "https://youtube.com" },
       ],

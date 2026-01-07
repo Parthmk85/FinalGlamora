@@ -1,103 +1,219 @@
 'use client'
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useCart } from "../../context/CartContext";
 
-const ShopContent = () => {
+const ShopContent = ({ appliedFilters, setAppliedFilters, removeFilter: removeFilterProp }) => {
+  const { addToCart } = useCart();
   const [sortBy, setSortBy] = useState("Popularity");
-  const [appliedFilters, setAppliedFilters] = useState([
-    { type: 'category', label: 'JACKETS & COATS' },
-    { type: 'price', label: '$100 - $500' },
-    { type: 'size', label: 'SIZE L' },
-  ]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Sample product data
-  const products = [
+  const initialProducts = [
     {
       id: 1,
-      name: "KNIT OTTOMAN COMB JACKET",
-      price: 100,
-      image: "coat-1.png",
-      colors: ["#1e3a8a", "#000000", "#d1d5db"]
+      name: "Classic Wool Blend Coat",
+      category: "Jacket & Coats",
+      price: 150,
+      image: "Shop-coat1.png",
+      colors: ["#000000", "#555555"]
     },
     {
       id: 2,
-      name: "KNIT VARSITY JACKET",
-      price: 350,
-      image: "coat-2.png",
-      colors: ["#1e3a8a", "#16a34a", "#a16207"]
+      name: "Urban Bomber Jacket",
+      category: "Jacket & Coats",
+      price: 120,
+      image: "Shop-coat2.png",
+      colors: ["#000000", "#FFFFFF"]
     },
     {
       id: 3,
-      name: "KNIT FLEECE JACKET",
-      price: 275,
-      image: "coat-3.png",
-      colors: ["#374151", "#d1d5db"]
+      name: "Winter Puffer Parka",
+      category: "Jacket & Coats",
+      price: 200,
+      image: "Shop-coat3.png",
+      colors: ["#1F2937", "#D1D5DB"]
     },
     {
       id: 4,
-      name: "SEQUOI VARSITY JACKET",
-      price: 200,
-      image: "coat-big.png",
-      colors: ["#3f6212"]
+      name: "Sleek Trench Coat",
+      category: "Jacket & Coats",
+      price: 180,
+      image: "Shop-coat4.png",
+      colors: ["#D2B48C", "#000000"]
     },
     {
       id: 5,
-      name: "CASUAL SIMPLY JACKET",
-      price: 400,
-      image: "coat-main.png",
-      colors: ["#991b1b", "#000000", "#374151"]
+      name: "Denim Trucker Jacket",
+      category: "Jacket & Coats",
+      price: 95,
+      image: "Shop-coat5.png",
+      colors: ["#1E3A8A", "#000000"]
     },
     {
       id: 6,
-      name: "CONTRAST SLEEVE VARSITY",
-      price: 225,
-      image: "coat-1.png",
-      colors: ["#f5f5dc"]
+      name: "Casual Oxford Shirt",
+      category: "Shirts",
+      price: 45,
+      image: "Shop-shirt1.png",
+      colors: ["#FFFFFF", "#87CEEB"]
     },
     {
       id: 7,
-      name: "UTILITY JACKET",
-      price: 350,
-      image: "coat-2.png",
-      colors: ["#991b1b", "#3b82f6", "#374151"]
+      name: "Slim Fit Check Shirt",
+      category: "Shirts",
+      price: 55,
+      image: "Shop-shirt2.png",
+      colors: ["#FF0000", "#000000"]
     },
     {
       id: 8,
-      name: "BOMBER FLEECE JACKET",
-      price: 275,
-      image: "coat-3.png",
-      colors: ["#a16207"]
+      name: "Classic Denim Shirt",
+      category: "Shirts",
+      price: 60,
+      image: "Shop-shirt3.png",
+      colors: ["#1E3A8A", "#87CEEB"]
     },
     {
       id: 9,
-      name: "MIRACLE AIR SHIRT JACKET",
-      price: 100,
-      image: "coat-big.png",
-      colors: ["#000000", "#3b82f6", "#374151"]
+      name: "Striped Business Shirt",
+      category: "Shirts",
+      price: 50,
+      image: "Shop-shirt4.png",
+      colors: ["#FFFFFF", "#0000FF"]
     },
+    {
+      id: 10,
+      name: "Summer Linen Shirt",
+      category: "Shirts",
+      price: 40,
+      image: "Shop-shirt5.png",
+      colors: ["#F5F5DC", "#FFFFFF"]
+    },
+    {
+      id: 11,
+      name: "Essential Cotton T-Shirt",
+      category: "T-shirts",
+      price: 25,
+      image: "Shop-Tshirt1.png",
+      colors: ["#FFFFFF", "#000000"]
+    },
+    {
+      id: 12,
+      name: "Graphic Print Tee",
+      category: "T-shirts",
+      price: 35,
+      image: "Shop-Tshirt2.png",
+      colors: ["#000000", "#FF0000"]
+    },
+    {
+      id: 13,
+      name: "V-Neck Basic Tee",
+      category: "T-shirts",
+      price: 28,
+      image: "Shop-Tshirt3.png",
+      colors: ["#808080", "#FFFFFF"]
+    },
+    {
+      id: 14,
+      name: "Striped Polo T-Shirt",
+      category: "T-shirts",
+      price: 45,
+      image: "Shop-Tshirt4.png",
+      colors: ["#000080", "#FFFFFF"]
+    },
+    {
+      id: 15,
+      name: "Oversized Streetwear Tee",
+      category: "T-shirts",
+      price: 55,
+      image: "Shop-Tshirt5.png",
+      colors: ["#000000", "#FFFF00"]
+    }
   ];
+
+  const [products, setProducts] = useState(initialProducts);
+  const [currentPage, setCurrentPage] = useState(1);
+  const topRef = React.useRef(null);
+
+  // Filter and Sort Effect
+  useEffect(() => {
+    let filtered = [...initialProducts];
+
+    // Apply filters
+    if (appliedFilters.length > 0) {
+      const categories = appliedFilters.filter(f => f.type === 'category').map(f => f.label);
+      const brands = appliedFilters.filter(f => f.type === 'brand').map(f => f.label);
+      const colors = appliedFilters.filter(f => f.type === 'color').map(f => f.label);
+      
+      if (categories.length > 0) {
+        filtered = filtered.filter(p => categories.includes(p.category));
+      }
+      // Add other filters as needed (brand logic needs brand in products, color logic needs matching)
+    }
+
+    // Apply Sorting
+    if (sortBy === "Price: Low to High") {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "Price: High to Low") {
+      filtered.sort((a, b) => b.price - a.price);
+    } else {
+      // Default / Popularity -> Shuffle
+      filtered.sort(() => Math.random() - 0.5);
+    }
+
+    setProducts(filtered);
+    setCurrentPage(1);
+  }, [appliedFilters, sortBy]);
+
+  // Shuffle function
+  const shuffleProducts = () => {
+    setProducts(prev => [...prev].sort(() => Math.random() - 0.5));
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    if (sortBy === 'Popularity') {
+      shuffleProducts();
+    }
+    topRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const sortOptions = ["Popularity", "Price: Low to High", "Price: High to Low", "Newest", "Rating"];
 
   const removeFilter = (index) => {
-    setAppliedFilters(prev => prev.filter((_, i) => i !== index));
+    const removedFilter = appliedFilters[index];
+    // If removing sort filter, reset to Popularity
+    if (removedFilter.type === 'sort') {
+      setSortBy('Popularity');
+    }
+    removeFilterProp(index);
   };
 
-  const handleSortChange = (e) => {
-    setSortBy(e.target.value);
-    // Add sorting logic here
+  const handleSortChange = (option) => {
+    setSortBy(option);
+    setIsDropdownOpen(false);
+    
+    // Remove any existing sort filter
+    const filteredFilters = appliedFilters.filter(f => f.type !== 'sort');
+    
+    // Add new sort filter if not Popularity (default)
+    if (option !== 'Popularity') {
+      setAppliedFilters([...filteredFilters, { type: 'sort', label: `Sort: ${option}` }]);
+    } else {
+      setAppliedFilters(filteredFilters);
+    }
   };
 
   return (
-    <div className="w-full bg-white rounded-2xl shadow-lg p-4 sm:p-6">
-      {/* Header Section */}
-      <div className="mb-6">
-        {/* Results Count */}
-        <div className="mb-4">
+    <div className="w-full bg-[#f5f5f5] rounded-2xl  p-4 sm:p-6">
+        {/* Header Section */}
+        <div className="mb-6">
+          {/* Results Count */}
+        <div className="mb-4 scroll-mt-24" ref={topRef}>
           <p className="text-sm sm:text-base text-gray-700">
-            Showing <span className="font-semibold">12</span> results from total <span className="font-semibold">127</span> for{" "}
-            <span className="font-semibold">&quot;Jacket & Coats&quot;</span>
+            Showing <span className="font-semibold">{products.length}</span> results from total <span className="font-semibold">{initialProducts.length}</span>
           </p>
         </div>
 
@@ -123,32 +239,46 @@ const ShopContent = () => {
         {/* Sort By */}
         <div className="flex items-center justify-between sm:justify-end gap-4">
           <div className="flex items-center gap-2">
-            <label className="text-sm sm:text-base font-medium text-gray-700">Sort by</label>
-            <select
-              value={sortBy}
-              onChange={handleSortChange}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm sm:text-base text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-gray-500 cursor-pointer"
-            >
-              {sortOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+            <label className="text-sm sm:text-base font-medium text-black">Sort by</label>
+            <div className="relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm sm:text-base text-black bg-[#f5f5f5] focus:outline-none cursor-pointer min-w-[180px] text-left flex items-center justify-between"
+              >
+                <span>{sortBy}</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {isDropdownOpen && (
+                <div className="absolute top-full left-0 mt-1 w-full bg-[#f5f5f5] border border-gray-300 rounded-md shadow-lg z-10">
+                  {sortOptions.map((option) => (
+                    <div
+                      key={option}
+                      onClick={() => handleSortChange(option)}
+                      className="px-3 py-2 text-sm sm:text-base text-black hover:bg-gray-400 cursor-pointer"
+                    >
+                      {option}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {products.map((product) => (
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {products.slice((currentPage - 1) * 6, currentPage * 6).map((product) => (
           <Link
             key={product.id}
             href={`/product?id=${product.id}`}
-            className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100"
+            className="group bg-[#f5f5f5] rounded-xl overflow-hidden transition-all duration-300 max-w-[280px] w-full mx-auto"
           >
             {/* Product Image */}
-            <div className="relative w-full aspect-[3/4] overflow-hidden bg-gray-100">
+            <div className="relative w-full aspect-square overflow-hidden bg-transparent">
+              <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-black/20 to-transparent z-10 pointer-events-none" />
               <Image
                 src={`/assets/${product.image}`}
                 alt={product.name}
@@ -172,7 +302,7 @@ const ShopContent = () => {
               </p>
 
               {/* Color Swatches */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mb-3">
                 {product.colors.map((color, index) => (
                   <div
                     key={index}
@@ -182,34 +312,61 @@ const ShopContent = () => {
                   />
                 ))}
               </div>
+
+              {/* Add to Cart Button */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  addToCart(product);
+                }}
+                className="w-full py-2 px-4 border-2 border-black bg-transparent text-black font-semibold rounded-lg hover:bg-black hover:text-white transition-all duration-300"
+              >
+                Add to Cart
+              </button>
             </div>
           </Link>
         ))}
       </div>
 
-      {/* Pagination (Optional) */}
-      <div className="mt-8 flex justify-center items-center gap-2">
-        <button className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-          Previous
-        </button>
-        <div className="flex gap-1">
-          {[1, 2, 3, 4, 5].map((page) => (
-            <button
-              key={page}
-              className={`px-3 py-2 text-sm rounded-md transition-colors ${
-                page === 1
-                  ? "bg-gray-900 text-white"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              {page}
-            </button>
-          ))}
+      {/* Pagination */}
+      {products.length > 6 && (
+        <div className="mt-8 flex justify-center items-center gap-2">
+          <button 
+            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 transition-colors ${
+              currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-black hover:text-white"
+            }`}
+          >
+            Previous
+          </button>
+          <div className="flex gap-1">
+            {Array.from({ length: Math.ceil(products.length / 6) }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                  page === currentPage
+                    ? "bg-black text-white"
+                    : "text-gray-700 hover:bg-black hover:text-white"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+          <button 
+            onClick={() => handlePageChange(Math.min(Math.ceil(products.length / 6), currentPage + 1))}
+            disabled={currentPage === Math.ceil(products.length / 6)}
+            className={`px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 transition-colors ${
+              currentPage === Math.ceil(products.length / 6) ? "opacity-50 cursor-not-allowed" : "hover:bg-black hover:text-white"
+            }`}
+          >
+            Next
+          </button>
         </div>
-        <button className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-          Next
-        </button>
-      </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import "./globals.css";
 import Navbar from "./components/Home/Navbar";
-import { CartProvider } from "./components/Home/CartContext";
+import { CartProvider } from "./context/CartContext";
 import Footer from "./components/Home/Footer";
 // import "./default-responsive.css";
 

@@ -48,11 +48,7 @@ const ReviewsSection = () => {
       const width = window.innerWidth;
       setIsMobile(width < 768); // md breakpoint
       if (width < 640) setVisibleCount(2); // mobile - show 2 reviews
-      else if (width < 768) setVisibleCount(2); // sm
-      else if (width < 1024) setVisibleCount(3); // md
-      else if (width < 1280) setVisibleCount(4); // lg
-      else if (width < 1536) setVisibleCount(4); // xl
-      else setVisibleCount(5); // 2xl
+      else setVisibleCount(4); // Desktop: Show 4 reviews (2x2 layout)
     };
 
     updateVisibleCount();
@@ -84,7 +80,7 @@ const ReviewsSection = () => {
       <div className="w-full max-w-6xl">
 
         {/* Header */}
-        <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
+        <div className="flex justify-between items-center mb-8 flex-wrap gap-3">
           <h2 className="text-xl sm:text-2xl font-extrabold uppercase tracking-wide">
             Rating & Reviews ({reviewsData.length})
           </h2>
@@ -94,15 +90,15 @@ const ReviewsSection = () => {
         </div>
 
         {/* Reviews Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8 2xl:gap-9">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {reviewsData.slice(index, index + visibleCount).map((r, i) => (
             <motion.div
               key={i}
               initial={initialForIndex(i)}
               whileInView={{ x: 0, y: 0, opacity: 1 }}
               viewport={{ once: true, amount: 0.3 }}
-              transition={{ delay: i * 0.12, duration: 0.6 }}
-              className="bg-white/60 backdrop-blur-sm border border-gray-200 rounded-3xl p-5 shadow-sm relative"
+              transition={{ delay: i * 0.1, duration: 0.5 }}
+              className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300"
             >
 
               {/* Profile */}
