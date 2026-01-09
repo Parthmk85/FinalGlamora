@@ -19,7 +19,7 @@ const MoreProduct = ({ list }) => {
   const [index, setIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
-  const [visibleCount, setVisibleCount] = useState(1); // number of cards visible at once
+  const [visibleCount, setVisibleCount] = useState(3); // number of cards visible at once - default to 3 for desktop
 
   // Set visibleCount based on screen size
   useEffect(() => {
@@ -27,10 +27,7 @@ const MoreProduct = ({ list }) => {
       const width = window.innerWidth;
       if (width < 640) setVisibleCount(1); // mobile
       else if (width < 768) setVisibleCount(2); // sm
-      else if (width < 1024) setVisibleCount(3); // md
-      else if (width < 1280) setVisibleCount(4); // lg
-      else if (width < 1536) setVisibleCount(5); // xl
-      else setVisibleCount(6); // 2xl
+      else setVisibleCount(3); // md and above (desktop) - show only 3
     };
 
     updateVisibleCount();
@@ -96,7 +93,7 @@ const MoreProduct = ({ list }) => {
         </div>
 
         {/* SLIDER */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5 lg:gap-6 xl:gap-7 2xl:gap-8">
+        <div className="flex gap-3 sm:gap-4 md:gap-5">
           <AnimatePresence initial={false} mode="wait">
             {Array.from({ length: visibleCount }).map((_, i) => {
               const p = products[(index + i) % products.length];
@@ -107,7 +104,8 @@ const MoreProduct = ({ list }) => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.5 }}
-                  className="rounded-[28px] sm:rounded-3xl overflow-hidden shadow-lg border border-gray-100 relative aspect-[3/4] w-full"
+                  className="rounded-[28px] sm:rounded-3xl overflow-hidden shadow-lg border border-gray-100 relative aspect-[3/4] flex-shrink-0"
+                  style={{ flexBasis: visibleCount === 1 ? '100%' : visibleCount === 2 ? 'calc(50% - 6px)' : 'calc(33.333% - 10px)' }}
                 >
                   <Image
                     src={`/assets/${p.img}`}
