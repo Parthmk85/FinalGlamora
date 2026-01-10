@@ -57,22 +57,6 @@ const ProductInfo = () => {
             </div>
           </div>
 
-          {/* Size */}
-          <div className="flex flex-col items-center md:items-start">
-            <p className="text-sm font-medium text-black mb-2">Select Size</p>
-            <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-              {productData.sizes.map((size, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelectedSize(size)}
-                  className={`px-4 py-1 border rounded-full text-xs sm:text-sm transition whitespace-nowrap ${selectedSize === size ? "bg-black text-white border-black" : "border-gray-300 text-gray-600 hover:border-black hover:text-black"
-                    }`}
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
-          </div>
 
         </div>
 
@@ -103,7 +87,13 @@ const ProductInfo = () => {
           {/* Buttons */}
           <div className="w-full flex flex-col sm:flex-row gap-3 sm:gap-4 mt-4 justify-center md:justify-end">
             <button
-              onClick={() => addToCart(quantity)}
+              onClick={() => addToCart({
+                id: 1,
+                name: productData.title,
+                price: productData.price,
+                image: '/assets/FourPhoto1.png',
+                quantity: quantity
+              })}
               className="px-6 py-2 border-2 border-black rounded-full text-xs sm:text-sm font-semibold hover:bg-black hover:text-white whitespace-nowrap"
             >
               ADD TO CART

@@ -15,24 +15,83 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [cartCount, setCartCount] = useState(0);
 
-  // Load cart from localStorage on mount
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      const items = JSON.parse(savedCart);
-      setCartItems(items);
-      setCartCount(items.reduce((total, item) => total + item.quantity, 0));
+    // Check auth status on mount
+    if (typeof window !== 'undefined') {
+      const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+      setUser(storedUser);
     }
   }, []);
 
-  // Save cart to localStorage whenever it changes
+  const getCartKey = () => {
+    if (typeof window === 'undefined') return 'cart_guest';
+    return user ? `cart_${user.email}` : 'cart_guest';
+  };
+
+  // Load cart (Combined Logic)
   useEffect(() => {
-    if (cartItems.length > 0) {
-      localStorage.setItem('cart', JSON.stringify(cartItems));
+    const loadCart = async () => {
+      // 1. If Logged In -> Try Fetch from DB
+      if (user && user.id) {
+        try {
+          const res = await fetch(`/api/cart?userId=${user.id}`);
+          const data = await res.json();
+          if (res.ok && data.items) {
+            setCartItems(data.items);
+            setCartCount(data.items.reduce((total, item) => total + item.quantity, 0));
+            return; // Success, stop here
+          }
+        } catch (error) {
+          console.error("Failed to load cart from DB:", error);
+        }
+      }
+
+      // 2. Fallback / Guest -> Load from LocalStorage
+      const savedCart = localStorage.getItem(getCartKey());
+      if (savedCart) {
+        const items = JSON.parse(savedCart);
+        setCartItems(items);
+        setCartCount(items.reduce((total, item) => total + item.quantity, 0));
+      } else {
+        setCartItems([]);
+        setCartCount(0);
+      }
+    };
+
+    loadCart();
+
+    // Poll for cart updates (Real-time sync)
+    // This ensures if Admin deletes a product, it disappears from User's cart
+    let intervalId;
+    if (user && user.id) {
+        intervalId = setInterval(loadCart, 3000);
     }
-    // Calculate cart count from items
+
+    return () => {
+        if (intervalId) clearInterval(intervalId);
+    };
+  }, [user]); // Re-run when user state changes
+
+  // Save cart (Combined Logic)
+  useEffect(() => {
+    // Save to LocalStorage (Always good for backup/offline)
+    localStorage.setItem(getCartKey(), JSON.stringify(cartItems));
+    
+    // Save to DB (If logged in)
+    if (user && user.id) {
+      // Debounce saving to avoid too many requests? For now direct.
+      fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, items: cartItems })
+      }).catch(err => console.error("Failed to save cart to DB", err));
+    }
+
+    // Calculate cart count
     setCartCount(cartItems.reduce((total, item) => total + item.quantity, 0));
-  }, [cartItems]);
+  }, [cartItems, user]);
 
   const addToCart = (product) => {
     setCartItems(prevItems => {
@@ -42,12 +101,12 @@ export const CartProvider = ({ children }) => {
         // Increase quantity if item already exists
         return prevItems.map(item =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + (product.quantity || 1) }
             : item
         );
       } else {
-        // Add new item
-        return [...prevItems, { ...product, quantity: 1 }];
+        // Add new item with specified quantity or default to 1
+        return [...prevItems, { ...product, quantity: product.quantity || 1 }];
       }
     });
   };

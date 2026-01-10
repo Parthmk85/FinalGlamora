@@ -108,7 +108,14 @@ const Navbar = ({ links, brandName, initialCart }) => {
 
               {/* User Profile */}
               <button
-                onClick={() => router.push('/profile')}
+                onClick={() => {
+                  const user = localStorage.getItem('user');
+                  if (user) {
+                    router.push('/profile');
+                  } else {
+                    router.push('/login');
+                  }
+                }}
                 aria-label="User Profile"
                 className="p-2 text-gray-600 hover:text-black transition"
               >

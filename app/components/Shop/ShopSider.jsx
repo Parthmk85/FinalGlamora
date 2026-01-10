@@ -30,7 +30,7 @@ const ShopSider = ({ toggleFilter, appliedFilters }) => {
     brands: false
   });
 
-  const [priceRange, setPriceRange] = useState({ min: 100, max: 500 });
+  const [priceRange, setPriceRange] = useState({ min: 50, max: 300 });
   const [expandedCategory, setExpandedCategory] = useState('menFashion');
 
   // Helper to check if filter is active
@@ -117,6 +117,13 @@ const ShopSider = ({ toggleFilter, appliedFilters }) => {
       ...prev,
       [type]: parseInt(value) || 0
     }));
+  };
+
+  const applyPriceFilter = () => {
+    // Remove existing price filter
+    const withoutPrice = appliedFilters.filter(f => f.type !== 'price');
+    // Add new price filter
+    toggleFilter('price', `$${priceRange.min} - $${priceRange.max}`);
   };
 
   return (
@@ -209,28 +216,34 @@ const ShopSider = ({ toggleFilter, appliedFilters }) => {
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
               />
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 mb-4">
               <div className="flex-1">
                 <label className="block text-xs text-black mb-1">From</label>
                 <input
                   type="number"
-                  value={priceRange.min}
+                  value={priceRange.min === 0 ? '' : priceRange.min}
                   onChange={(e) => handlePriceChange('min', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                  placeholder="$100"
+                  placeholder="0"
                 />
               </div>
               <div className="flex-1">
                 <label className="block text-xs text-black mb-1">To</label>
                 <input
                   type="number"
-                  value={priceRange.max}
+                  value={priceRange.max === 0 ? '' : priceRange.max}
                   onChange={(e) => handlePriceChange('max', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                  placeholder="$500"
+                  placeholder="0"
                 />
               </div>
             </div>
+            <button
+              onClick={applyPriceFilter}
+              className="w-full py-2 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Apply Price Filter
+            </button>
           </div>
         )}
       </div>

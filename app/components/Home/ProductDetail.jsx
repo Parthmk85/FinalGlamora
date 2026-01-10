@@ -31,9 +31,21 @@ const ProductDetail = ({ product }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [showPart, setShowPart] = useState(1);
 
+  // Hardcoded Size Chart with obvious differences
+  const sizeChart = {
+    XXS: { Shoulder: "40cm", Bust: "100cm", Length: "100cm", SleeveLength: "50cm" },
+    XS:  { Shoulder: "45cm", Bust: "110cm", Length: "110cm", SleeveLength: "55cm" },
+    S:   { Shoulder: "50cm", Bust: "124cm", Length: "122cm", SleeveLength: "64cm" },
+    M:   { Shoulder: "55cm", Bust: "135cm", Length: "130cm", SleeveLength: "68cm" },
+    L:   { Shoulder: "60cm", Bust: "145cm", Length: "135cm", SleeveLength: "72cm" },
+    XL:  { Shoulder: "65cm", Bust: "155cm", Length: "140cm", SleeveLength: "76cm" },
+  };
+
+  const currentMeasurements = sizeChart[selectedSize] || sizeChart["S"];
+
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint
+      setIsMobile(window.innerWidth < 768);
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
@@ -93,7 +105,7 @@ const ProductDetail = ({ product }) => {
         {/* SIZE & FIT */}
         <div className="text-center md:text-right">
           <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold uppercase mb-4">
-            Size & Fit
+            Size & Fit ({selectedSize})
           </h2>
 
           {/* Size Selector */}
@@ -114,7 +126,7 @@ const ProductDetail = ({ product }) => {
 
           {/* Measurement Table */}
           <div className="w-full text-[10px] sm:text-xs md:text-sm space-y-2 md:space-y-3 max-w-md ml-auto mr-auto md:mr-0">
-            {Object.entries(productData.sizeFit).map(([label, value], i) => (
+            {Object.entries(currentMeasurements).map(([label, value], i) => (
               <div
                 key={i}
                 className="flex justify-between md:justify-end md:gap-16 border-b border-gray-200 pb-1 text-left md:text-right"
