@@ -2,9 +2,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useToast } from '../context/ToastContext';
 
 const Contact = () => {
   const router = useRouter();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
@@ -47,6 +49,7 @@ const Contact = () => {
         });
 
         if (res.ok) {
+            showToast('Message sent successfully! We\'ll get back to you soon.', 'success');
             setSubmitSuccess(true);
             // Reset form after 3 seconds
             setTimeout(() => {
@@ -61,11 +64,11 @@ const Contact = () => {
             }, 3000);
         } else {
             console.error("Failed to send message");
-            alert("Failed to send message. Please try again.");
+            showToast('Failed to send message. Please try again.', 'error');
         }
     } catch (error) {
         console.error("Error sending message:", error);
-        alert("An error occurred. Please try again.");
+        showToast('An error occurred. Please try again.', 'error');
     } finally {
         setIsSubmitting(false);
     }
@@ -86,7 +89,7 @@ const Contact = () => {
         <div className="bg-white rounded-2xl p-3 sm:p-4">
           
           {/* Breadcrumb Navigation */}
-          <div className="mb-6">
+          <div className="mb-6 text-black">
             <div className="flex items-center gap-2 text-sm">
               <Link href="/" className="text-black hover:underline font-medium">
                 Home

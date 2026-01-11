@@ -1,5 +1,6 @@
 'use client'
 import React, { useState } from 'react'
+import Link from 'next/link'
 import ShopBanner from '../components/Shop/shopBanner'
 import ShopContent from '../components/Shop/Shopcontant'
 import ShopSider from '../components/Shop/ShopSider'
@@ -33,7 +34,15 @@ const S = () => {
         
         {/* Inner White Box with gap from sides */}
         <div className='bg-white rounded-2xl p-3 sm:p-4'>
-          <ShopBanner />
+            {/* Breadcrumb */}
+            <div className="mb-6 text-black">
+                <div className="flex items-center gap-2 text-sm">
+                    <Link href="/" className="text-black hover:underline font-medium">Home</Link>
+                    <span className="text-black">/</span>
+                    <span className="text-black font-semibold">Shop</span>
+                </div>
+            </div>
+            <ShopBanner />
           
           {/* Main Content Area - Sidebar and Products */}
           <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 mt-6">

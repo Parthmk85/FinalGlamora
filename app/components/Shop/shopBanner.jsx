@@ -8,13 +8,7 @@ const ShopBanner = () => {
     return (
         <div className="w-full px-2 sm:px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-12 py-4 sm:py-6 md:py-8">
             {/* Breadcrumb Navigation */}
-            <nav className="mb-3 sm:mb-4 text-xs sm:text-sm text-black font-medium">
-                <Link href="/shop" className="hover:underline">
-                    Man Fashion
-                </Link>
-                <span className="mx-2">/</span>
-                <span className="text-gray-600">All Products</span>
-            </nav>
+
 
             {/* Main Banner */}
             <motion.div 

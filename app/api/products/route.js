@@ -21,9 +21,9 @@ export async function GET() {
     }
 }
 
-export async function POST(request) {
+    export async function POST(request) {
     try {
-        const { name, price, category, image, description } = await request.json();
+        const { name, price, category, image, description, color, sizes, brand } = await request.json();
 
         if (!name || !price || !category) {
             return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
@@ -38,6 +38,9 @@ export async function POST(request) {
             category,
             image: image || 'https://via.placeholder.com/300', // Default placeholder if empty
             description,
+            color: color || '',
+            sizes: sizes || [],
+            brand: brand || '',
             createdAt: new Date()
         };
 

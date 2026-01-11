@@ -28,15 +28,34 @@ export async function POST(request) {
             );
         }
 
+        // Normalize phone number (remove +91 for consistent storage)
+        const normalizedPhone = phone ? phone.replace('+91', '') : '';
+
+        // Check if phone number already exists (double-check)
+        if (normalizedPhone) {
+            const existingPhone = await users.findOne({
+                $or: [
+                    { phone: normalizedPhone },
+                    { phone: '+91' + normalizedPhone }
+                ]
+            });
+            if (existingPhone) {
+                return NextResponse.json(
+                    { message: 'This phone number is already registered.' },
+                    { status: 400 }
+                );
+            }
+        }
+
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create user
+        // Create user with normalized phone number
         const result = await users.insertOne({
             name,
             email,
             password: hashedPassword,
-            phone: phone || '', // Use the provided phone
+            phone: normalizedPhone, // Store without +91 for consistency
             address: '',
             createdAt: new Date()
         });

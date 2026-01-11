@@ -35,26 +35,15 @@ export default function AdminMessages() {
         return () => clearInterval(interval);
     }, [router]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('isAdmin');
-        router.push('/admin/login');
-    };
+
 
     if (loading) return <div className="p-10 text-center font-bold">Loading Messages...</div>;
 
     return (
-        <div className="min-h-screen bg-[#f5f5f5] p-6 sm:p-10 text-black font-satoshi">
+        <div className="bg-[#f5f5f5] text-black font-satoshi">
             <div className="max-w-6xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold">Inquiries & Messages</h1>
-                    <div className="flex gap-4">
-                        <Link href="/admin/dashboard" className="px-4 py-2 bg-gray-200 text-black font-semibold rounded-lg hover:bg-gray-300 transition-all">
-                            Back to Dashboard
-                        </Link>
-                        <button onClick={handleLogout} className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-all">
-                            Logout
-                        </button>
-                    </div>
                 </div>
 
                 <div className="space-y-4">

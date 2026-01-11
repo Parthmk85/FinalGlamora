@@ -112,24 +112,10 @@ export default function AdminUsers() {
     if (loading) return <div className="p-10 text-center">Loading Users...</div>;
 
     return (
-        <div className="min-h-screen bg-[#f5f5f5] p-6 sm:p-10">
+        <div className="bg-[#f5f5f5]">
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-black">User Management</h1>
-                    <div className="flex gap-4">
-                        <Link href="/admin/dashboard" className="px-4 py-2 bg-gray-200 text-black font-semibold rounded-lg hover:bg-gray-300">
-                            Back to Dashboard
-                        </Link>
-                        <button 
-                            onClick={() => {
-                                localStorage.removeItem('isAdmin');
-                                router.push('/admin/login');
-                            }} 
-                            className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700"
-                        >
-                            Logout
-                        </button>
-                    </div>
                 </div>
 
                 <div className="bg-white rounded-2xl shadow-md overflow-hidden">

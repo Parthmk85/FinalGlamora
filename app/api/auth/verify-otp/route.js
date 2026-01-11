@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-import twilio from 'twilio';
-
-const ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
-const SERVICE_SID = process.env.TWILIO_SERVICE_SID;
-const AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+import clientPromise from '@/lib/mongodb';
 
 export async function POST(request) {
     try {
@@ -13,29 +9,51 @@ export async function POST(request) {
             return NextResponse.json({ message: 'Phone and OTP are required' }, { status: 400 });
         }
 
-        if (!AUTH_TOKEN) {
-             // Mock check for dev
-             if (otp === '1234') {
-                 return NextResponse.json({ success: true, message: 'Mock Verified' }, { status: 200 });
-             }
-             return NextResponse.json({ success: false, message: 'Invalid Mock OTP' }, { status: 400 });
+        // Connect to database
+        const client = await clientPromise;
+        const db = client.db('glamora');
+        const otpCollection = db.collection('otp_verifications');
+
+        // Find OTP for this phone number
+        const otpRecord = await otpCollection.findOne({ phone });
+
+        if (!otpRecord) {
+            return NextResponse.json({ 
+                success: false, 
+                message: 'No OTP found. Please request a new OTP.' 
+            }, { status: 400 });
         }
 
-        const client = twilio(ACCOUNT_SID, AUTH_TOKEN);
+        // Check if OTP has expired
+        if (new Date() > otpRecord.expiresAt) {
+            // Delete expired OTP
+            await otpCollection.deleteOne({ phone });
+            return NextResponse.json({ 
+                success: false, 
+                message: 'OTP has expired. Please request a new OTP.' 
+            }, { status: 400 });
+        }
 
-        // Verification Check
-        const verification_check = await client.verify.v2.services(SERVICE_SID)
-            .verificationChecks
-            .create({ to: phone, code: otp });
-
-        if (verification_check.status === 'approved') {
-            return NextResponse.json({ success: true, message: 'Phone Verified Successfully' }, { status: 200 });
+        // Verify OTP
+        if (otpRecord.otp === otp) {
+            // Delete OTP after successful verification
+            await otpCollection.deleteOne({ phone });
+            
+            console.log(`✅ OTP Verified for ${phone}`);
+            
+            return NextResponse.json({ 
+                success: true, 
+                message: 'Phone verified successfully' 
+            }, { status: 200 });
         } else {
-            return NextResponse.json({ success: false, message: 'Invalid OTP' }, { status: 400 });
+            return NextResponse.json({ 
+                success: false, 
+                message: 'Invalid OTP. Please try again.' 
+            }, { status: 400 });
         }
 
     } catch (error) {
-        console.error('Twilio Verify Check Error:', error);
-        return NextResponse.json({ message: 'Error verifying code' }, { status: 500 });
+        console.error('OTP Verification Error:', error);
+        return NextResponse.json({ message: 'Error verifying OTP' }, { status: 500 });
     }
 }

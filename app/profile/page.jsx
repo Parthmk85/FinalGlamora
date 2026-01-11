@@ -108,7 +108,7 @@ export default function Profile() {
                 <div className="bg-white rounded-2xl p-3 sm:p-4">
                     
                     {/* Breadcrumb */}
-                    <div className="mb-6">
+                    <div className="mb-6 text-black">
                         <div className="flex items-center gap-2 text-sm">
                             <Link href="/" className="text-black hover:underline font-medium">Home</Link>
                             <span className="text-black">/</span>

@@ -9,7 +9,7 @@ export async function POST(request) {
         // Validate input
         if (!email || !password) {
             return NextResponse.json(
-                { message: 'Email and password are required' },
+                { message: 'Email/Phone and password are required' },
                 { status: 400 }
             );
         }
@@ -19,8 +19,14 @@ export async function POST(request) {
         const db = client.db('glamora');
         const users = db.collection('users');
 
-        // Find user
-        const user = await users.findOne({ email });
+        // Find user by email OR phone number
+        const user = await users.findOne({
+            $or: [
+                { email: email },
+                { phone: email } // 'email' field contains either email or phone
+            ]
+        });
+        
         if (!user) {
             return NextResponse.json(
                 { message: 'Invalid credentials' },

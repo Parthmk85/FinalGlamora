@@ -61,26 +61,15 @@ export default function AdminProducts() {
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('isAdmin');
-        router.push('/admin/login');
-    };
+
 
     if (loading) return <div className="p-10 text-center font-bold">Loading Products...</div>;
 
     return (
-        <div className="min-h-screen bg-[#f5f5f5] p-6 sm:p-10 text-black font-satoshi">
+        <div className="bg-[#f5f5f5] text-black font-satoshi">
             <div className="max-w-6xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold">Manage Products (Cards)</h1>
-                    <div className="flex gap-4">
-                        <Link href="/admin/dashboard" className="px-4 py-2 bg-gray-200 text-black font-semibold rounded-lg hover:bg-gray-300 transition-all">
-                            Back to Dashboard
-                        </Link>
-                        <button onClick={handleLogout} className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-all">
-                            Logout
-                        </button>
-                    </div>
                 </div>
 
                 {/* Status Message */}
@@ -99,7 +88,10 @@ export default function AdminProducts() {
                                 <tr>
                                     <th className="p-4">Image</th>
                                     <th className="p-4">Name</th>
+                                    <th className="p-4">Brand</th>
                                     <th className="p-4">Category</th>
+                                    <th className="p-4">Color</th>
+                                    <th className="p-4">Sizes</th>
                                     <th className="p-4">Price</th>
                                     <th className="p-4">Date Added</th>
                                     <th className="p-4 text-center">Action</th>
@@ -119,7 +111,20 @@ export default function AdminProducts() {
                                             </div>
                                         </td>
                                         <td className="p-4 font-semibold">{product.name}</td>
+                                        <td className="p-4 text-gray-700 font-medium">{product.brand || '-'}</td>
                                         <td className="p-4 text-gray-600">{product.category}</td>
+                                        <td className="p-4 text-gray-600">{product.color || '-'}</td>
+                                        <td className="p-4">
+                                            <div className="flex flex-wrap gap-1">
+                                                {product.sizes && product.sizes.length > 0 ? (
+                                                    product.sizes.map(size => (
+                                                        <span key={size} className="px-2 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs font-bold text-gray-700">
+                                                            {size}
+                                                        </span>
+                                                    ))
+                                                ) : <span className="text-gray-400">-</span>}
+                                            </div>
+                                        </td>
                                         <td className="p-4 font-bold text-green-700">${product.price}</td>
                                         <td className="p-4 text-sm text-gray-500">
                                             {product.createdAt ? new Date(product.createdAt).toLocaleDateString() : 'N/A'}
@@ -136,7 +141,7 @@ export default function AdminProducts() {
                                 ))}
                                 {products.length === 0 && (
                                     <tr>
-                                        <td colSpan="6" className="p-8 text-center text-gray-500 italic">No products found.</td>
+                                        <td colSpan="9" className="p-8 text-center text-gray-500 italic">No products found.</td>
                                     </tr>
                                 )}
                             </tbody>

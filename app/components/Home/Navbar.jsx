@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "../../context/CartContext";
 
 let Icons = null;
@@ -10,13 +10,23 @@ try { Icons = require("lucide-react"); } catch { }
 const Navbar = ({ links, brandName, initialCart }) => {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { cartCount } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const searchInputRef = useRef(null);
 
-  useEffect(() => { if (showSearch && searchInputRef.current) searchInputRef.current.focus(); }, [showSearch]);
+  // Sync search bar with URL params
+  useEffect(() => {
+    const query = searchParams?.get('search');
+    if (query) {
+        setSearchTerm(query);
+        setShowSearch(true);
+    }
+  }, [searchParams]);
+
+  useEffect(() => { if (showSearch && searchInputRef.current && !searchTerm) searchInputRef.current.focus(); }, [showSearch]);
 
   const navLinks = links || [
     { name: "HOME", path: "/" },
@@ -28,10 +38,14 @@ const Navbar = ({ links, brandName, initialCart }) => {
   const submitSearch = (q) => {
     const query = String(q || searchTerm || "").trim();
     if (!query) return;
-    setSearchTerm("");
-    setShowSearch(false);
+    // Don't clear term or close box, so it persists
     router.push(`/shop?search=${encodeURIComponent(query)}`);
   };
+
+  // Hide Navbar for Admin pages
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-transparent">

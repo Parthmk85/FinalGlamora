@@ -1,55 +1,61 @@
 'use client'
 import React, { useState, useEffect } from "react";
 import { useCart } from "../../context/CartContext";
+import { useToast } from "../../context/ToastContext";
+import { useSearchParams } from "next/navigation";
+import Fuse from "fuse.js";
 
 const ShopContent = ({ appliedFilters, removeFilter }) => {
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get('search');
   const { addToCart } = useCart();
+  const { showToast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 6;
 
   // Hardcoded products as initial state
   const initialProducts = [
-    // Jackets & Coats (5 products)
-    { id: 1, name: "Classic Wool Coat", category: "Jacket & Coats", price: 150, image: "/assets/Shop-coat1.png", tag: "Winter" },
-    { id: 2, name: "Leather Jacket", category: "Jacket & Coats", price: 180, image: "/assets/Shop-coat2.png", tag: "Premium" },
-    { id: 3, name: "Puffer Jacket", category: "Jacket & Coats", price: 120, image: "/assets/Shop-coat3.png", tag: "Warm" },
-    { id: 4, name: "Trench Coat", category: "Jacket & Coats", price: 200, image: "/assets/Shop-coat4.png", tag: "Classic" },
-    { id: 5, name: "Bomber Jacket", category: "Jacket & Coats", price: 140, image: "/assets/Shop-coat5.png", tag: "Casual" },
+    // Jackets & Coats
+    { id: 1, name: "Classic Wool Coat", category: "Jacket & Coats", price: 150, image: "/assets/Shop-coat1.png", tag: "Winter", color: "Black", sizes: ["M", "L", "XL"], brand: "Zara" },
+    { id: 2, name: "Leather Jacket", category: "Jacket & Coats", price: 180, image: "/assets/Shop-coat2.png", tag: "Premium", color: "Brown", sizes: ["S", "M", "L"], brand: "Gucci" },
+    { id: 3, name: "Puffer Jacket", category: "Jacket & Coats", price: 120, image: "/assets/Shop-coat3.png", tag: "Warm", color: "Red", sizes: ["M", "L"], brand: "Nike" },
+    { id: 4, name: "Trench Coat", category: "Jacket & Coats", price: 200, image: "/assets/Shop-coat4.png", tag: "Classic", color: "Cream", sizes: ["L", "XL"], brand: "Burberry" },
+    { id: 5, name: "Bomber Jacket", category: "Jacket & Coats", price: 140, image: "/assets/Shop-coat5.png", tag: "Casual", color: "Green", sizes: ["M", "L", "XL"], brand: "Puma" },
     
-    // Shirts (5 products)
-    { id: 6, name: "Oxford Shirt", category: "Shirts", price: 45, image: "/assets/Shop-shirt1.png", tag: "Business" },
-    { id: 7, name: "Denim Shirt", category: "Shirts", price: 55, image: "/assets/Shop-shirt2.png", tag: "Casual" },
-    { id: 8, name: "Flannel Shirt", category: "Shirts", price: 50, image: "/assets/Shop-shirt3.png", tag: "Comfort" },
-    { id: 9, name: "Linen Shirt", category: "Shirts", price: 60, image: "/assets/Shop-shirt4.png", tag: "Summer" },
-    { id: 10, name: "Check Shirt", category: "Shirts", price: 48, image: "/assets/Shop-shirt5.png", tag: "Classic" },
+    // Shirts
+    { id: 6, name: "Oxford Shirt", category: "Shirts", price: 45, image: "/assets/Shop-shirt1.png", tag: "Business", color: "Blue", sizes: ["S", "M", "L", "XL"], brand: "H&M" },
+    { id: 7, name: "Denim Shirt", category: "Shirts", price: 55, image: "/assets/Shop-shirt2.png", tag: "Casual", color: "Blue", sizes: ["M", "L"], brand: "Levis" },
+    { id: 8, name: "Flannel Shirt", category: "Shirts", price: 50, image: "/assets/Shop-shirt3.png", tag: "Comfort", color: "Red", sizes: ["M", "L", "XL"], brand: "Uniqlo" },
+    { id: 9, name: "Linen Shirt", category: "Shirts", price: 60, image: "/assets/Shop-shirt4.png", tag: "Summer", color: "White", sizes: ["S", "M", "L"], brand: "Zara" },
+    { id: 10, name: "Check Shirt", category: "Shirts", price: 48, image: "/assets/Shop-shirt5.png", tag: "Classic", color: "Grey", sizes: ["M", "L"], brand: "H&M" },
     
-    // T-Shirts (5 products)
-    { id: 11, name: "Basic Tee", category: "T-shirts", price: 25, image: "/assets/Shop-Tshirt1.png", tag: "Essential" },
-    { id: 12, name: "V-Neck Tee", category: "T-shirts", price: 28, image: "/assets/Shop-Tshirt2.png", tag: "Casual" },
-    { id: 13, name: "Graphic Tee", category: "T-shirts", price: 35, image: "/assets/Shop-Tshirt3.png", tag: "Trendy" },
-    { id: 14, name: "Polo Shirt", category: "T-shirts", price: 45, image: "/assets/Shop-Tshirt4.png", tag: "Smart" },
-    { id: 15, name: "Long Sleeve Tee", category: "T-shirts", price: 32, image: "/assets/Shop-Tshirt5.png", tag: "Comfort" },
+    // T-Shirts
+    { id: 11, name: "Basic Tee", category: "T-shirts", price: 25, image: "/assets/Shop-Tshirt1.png", tag: "Essential", color: "White", sizes: ["XS", "S", "M", "L", "XL"], brand: "Uniqlo" },
+    { id: 12, name: "V-Neck Tee", category: "T-shirts", price: 28, image: "/assets/Shop-Tshirt2.png", tag: "Casual", color: "Black", sizes: ["S", "M", "L"], brand: "Nike" },
+    { id: 13, name: "Graphic Tee", category: "T-shirts", price: 35, image: "/assets/Shop-Tshirt3.png", tag: "Trendy", color: "Yellow", sizes: ["M", "L"], brand: "Adidas" },
+    { id: 14, name: "Polo Shirt", category: "T-shirts", price: 45, image: "/assets/Shop-Tshirt4.png", tag: "Smart", color: "Blue", sizes: ["M", "L", "XL"], brand: "Ralph Lauren" },
+    { id: 15, name: "Long Sleeve Tee", category: "T-shirts", price: 32, image: "/assets/Shop-Tshirt5.png", tag: "Comfort", color: "Grey", sizes: ["S", "M", "L"], brand: "H&M" },
     
-    // Outer & Blazer (5 products)
-    { id: 16, name: "Navy Blazer", category: "Outer & Blazer", price: 220, image: "/assets/Shop-coat1.png", tag: "Formal" },
-    { id: 17, name: "Sport Coat", category: "Outer & Blazer", price: 190, image: "/assets/Shop-coat2.png", tag: "Smart" },
-    { id: 18, name: "Tweed Blazer", category: "Outer & Blazer", price: 240, image: "/assets/Shop-coat3.png", tag: "Classic" },
-    { id: 19, name: "Casual Blazer", category: "Outer & Blazer", price: 180, image: "/assets/Shop-coat4.png", tag: "Versatile" },
-    { id: 20, name: "Double Breasted", category: "Outer & Blazer", price: 260, image: "/assets/Shop-coat5.png", tag: "Premium" },
+    // Outer & Blazer
+    { id: 16, name: "Navy Blazer", category: "Outer & Blazer", price: 220, image: "/assets/Shop-coat1.png", tag: "Formal", color: "Blue", sizes: ["M", "L", "XL"], brand: "Hugo Boss" },
+    { id: 17, name: "Sport Coat", category: "Outer & Blazer", price: 190, image: "/assets/Shop-coat2.png", tag: "Smart", color: "Grey", sizes: ["L", "XL"], brand: "Zara" },
+    { id: 18, name: "Tweed Blazer", category: "Outer & Blazer", price: 240, image: "/assets/Shop-coat3.png", tag: "Classic", color: "Brown", sizes: ["M", "L", "XL"], brand: "Ralph Lauren" },
+    { id: 19, name: "Casual Blazer", category: "Outer & Blazer", price: 180, image: "/assets/Shop-coat4.png", tag: "Versatile", color: "Black", sizes: ["M", "L"], brand: "H&M" },
+    { id: 20, name: "Double Breasted", category: "Outer & Blazer", price: 260, image: "/assets/Shop-coat5.png", tag: "Premium", color: "Blue", sizes: ["L", "XL"], brand: "Gucci" },
     
-    // Hoodies (5 products)
-    { id: 21, name: "Pullover Hoodie", category: "Hoodies", price: 65, image: "/assets/Shop-Tshirt1.png", tag: "Comfort" },
-    { id: 22, name: "Zip Hoodie", category: "Hoodies", price: 70, image: "/assets/Shop-Tshirt2.png", tag: "Active" },
-    { id: 23, name: "Oversized Hoodie", category: "Hoodies", price: 75, image: "/assets/Shop-Tshirt3.png", tag: "Trendy" },
-    { id: 24, name: "Tech Hoodie", category: "Hoodies", price: 85, image: "/assets/Shop-Tshirt4.png", tag: "Sport" },
-    { id: 25, name: "Fleece Hoodie", category: "Hoodies", price: 68, image: "/assets/Shop-Tshirt5.png", tag: "Warm" },
+    // Hoodies
+    { id: 21, name: "Pullover Hoodie", category: "Hoodies", price: 65, image: "/assets/Shop-Tshirt1.png", tag: "Comfort", color: "Grey", sizes: ["S", "M", "L", "XL"], brand: "Nike" },
+    { id: 22, name: "Zip Hoodie", category: "Hoodies", price: 70, image: "/assets/Shop-Tshirt2.png", tag: "Active", color: "Black", sizes: ["M", "L", "XL"], brand: "Adidas" },
+    { id: 23, name: "Oversized Hoodie", category: "Hoodies", price: 75, image: "/assets/Shop-Tshirt3.png", tag: "Trendy", color: "Purple", sizes: ["M", "L"], brand: "Puma" },
+    { id: 24, name: "Tech Hoodie", category: "Hoodies", price: 85, image: "/assets/Shop-Tshirt4.png", tag: "Sport", color: "Blue", sizes: ["M", "L"], brand: "Nike" },
+    { id: 25, name: "Fleece Hoodie", category: "Hoodies", price: 68, image: "/assets/Shop-Tshirt5.png", tag: "Warm", color: "Green", sizes: ["S", "M", "L"], brand: "North Face" },
     
-    // Jeans (5 products)
-    { id: 26, name: "Slim Fit Jeans", category: "Jeans", price: 80, image: "/assets/Shop-shirt1.png", tag: "Modern" },
-    { id: 27, name: "Straight Jeans", category: "Jeans", price: 75, image: "/assets/Shop-shirt2.png", tag: "Classic" },
-    { id: 28, name: "Skinny Jeans", category: "Jeans", price: 85, image: "/assets/Shop-shirt3.png", tag: "Fitted" },
-    { id: 29, name: "Relaxed Jeans", category: "Jeans", price: 78, image: "/assets/Shop-shirt4.png", tag: "Comfort" },
-    { id: 30, name: "Bootcut Jeans", category: "Jeans", price: 82, image: "/assets/Shop-shirt5.png", tag: "Retro" },
+    // Jeans
+    { id: 26, name: "Slim Fit Jeans", category: "Jeans", price: 80, image: "/assets/Shop-shirt1.png", tag: "Modern", color: "Blue", sizes: ["30", "32", "34"], brand: "Levis" },
+    { id: 27, name: "Straight Jeans", category: "Jeans", price: 75, image: "/assets/Shop-shirt2.png", tag: "Classic", color: "Black", sizes: ["30", "32", "34", "36"], brand: "Wrangler" },
+    { id: 28, name: "Skinny Jeans", category: "Jeans", price: 85, image: "/assets/Shop-shirt3.png", tag: "Fitted", color: "Grey", sizes: ["28", "30", "32"], brand: "Zara" },
+    { id: 29, name: "Relaxed Jeans", category: "Jeans", price: 78, image: "/assets/Shop-shirt4.png", tag: "Comfort", color: "Blue", sizes: ["32", "34", "36"], brand: "Gap" },
+    { id: 30, name: "Bootcut Jeans", category: "Jeans", price: 82, image: "/assets/Shop-shirt5.png", tag: "Retro", color: "Blue", sizes: ["30", "32", "34"], brand: "Diesel" },
   ];
 
   const [allProducts, setAllProducts] = useState(initialProducts);
@@ -66,10 +72,13 @@ const ShopContent = ({ appliedFilters, removeFilter }) => {
                 const dbProducts = data.products.map(p => ({
                     id: p._id || p.id,
                     name: p.name,
-                    category: p.category, // Ensure category matches filter keys
+                    category: p.category, 
                     price: p.price,
                     image: p.image,
-                    tag: 'New' // New tag for added products
+                    tag: 'New',
+                    color: p.color || 'Black',
+                    sizes: p.sizes || ['M', 'L'],
+                    brand: p.brand || 'Generic'
                 }));
                 // Combine and set
                 const combined = [...initialProducts, ...dbProducts];
@@ -84,10 +93,22 @@ const ShopContent = ({ appliedFilters, removeFilter }) => {
     fetchProducts();
   }, []);
 
-  // Apply filters whenever filters change OR allProducts change
+  // Apply filters whenever filters change OR allProducts change OR search query changes
   useEffect(() => {
     let filtered = [...allProducts];
 
+    // 1. Fuzzy Search Filter (if search query exists)
+    if (searchQuery) {
+        const fuse = new Fuse(filtered, {
+            keys: ['name', 'category', 'tag'], // Fields to search in
+            threshold: 0.4, // Tolerance for typos (lower = stricter)
+            includeScore: true
+        });
+        const results = fuse.search(searchQuery);
+        filtered = results.map(result => result.item);
+    }
+
+    // 2. Applied Filters (Category, Price)
     if (appliedFilters.length > 0) {
       // Category filters
       const categoryFilters = appliedFilters
@@ -95,24 +116,6 @@ const ShopContent = ({ appliedFilters, removeFilter }) => {
         .map(f => f.label);
       
       if (categoryFilters.length > 0) {
-        // Need to match hardcoded categories roughly
-        // Hardcoded: "Jacket & Coats", "Shirts", etc.
-        // Dropdown values in Admin might be keys "menFashion", "womanFashion"
-        // Wait, Admin Dashboard saves "menFashion" etc.
-        // But ShopSider filters use "Jacket & Coats", "Shirts" etc. (Sub-items)
-        // Admin categories are HIGH LEVEL (Man, Woman).
-        // The hardcoded products use SPECIFIC types ("Shirts").
-        // This is a disconnect.
-        
-        // Solution: Admin should ideally select specific type, OR we map 'menFashion' to show up anyway?
-        // Let's assume for now user adds product with specific type?
-        // In my Admin Dashboard I put a dropdown for "Category".
-        // The values were keys like 'menFashion'.
-        // But the Sidebar filters by 'name' (e.g. 'Dresses').
-        
-        // Let's rely on basic filtering. If exact match fails, it won't show in specific filter.
-        // It WILL show in "All" view.
-        
         filtered = filtered.filter(p => categoryFilters.includes(p.category));
       }
 
@@ -127,11 +130,29 @@ const ShopContent = ({ appliedFilters, removeFilter }) => {
           filtered = filtered.filter(p => p.price >= min && p.price <= max);
         }
       }
+
+      // Color filter
+      const colorFilters = appliedFilters.filter(f => f.type === 'color').map(f => f.label.toLowerCase());
+      if (colorFilters.length > 0) {
+        filtered = filtered.filter(p => p.color && colorFilters.includes(p.color.toLowerCase()));
+      }
+
+      // Size filter (Exact match usually preferred for sizes like 'M', as 'm' might be valid but 'M' is standard)
+      const sizeFilters = appliedFilters.filter(f => f.type === 'size').map(f => f.label);
+      if (sizeFilters.length > 0) {
+         filtered = filtered.filter(p => p.sizes && p.sizes.some(s => sizeFilters.includes(s)));
+      }
+
+      // Brand filter
+      const brandFilters = appliedFilters.filter(f => f.type === 'brand').map(f => f.label.toLowerCase());
+      if (brandFilters.length > 0) {
+        filtered = filtered.filter(p => p.brand && brandFilters.includes(p.brand.toLowerCase()));
+      }
     }
 
     setFilteredProducts(filtered);
     setCurrentPage(1); // Reset to page 1 when filters change
-  }, [appliedFilters, allProducts]);
+  }, [appliedFilters, allProducts, searchQuery]);
 
   const handleAddToCart = (product) => {
     addToCart({
@@ -141,6 +162,7 @@ const ShopContent = ({ appliedFilters, removeFilter }) => {
       image: product.image,
       quantity: 1
     });
+    showToast(`${product.name} added to cart!`, 'success', 2000);
   };
 
   // Pagination calculations

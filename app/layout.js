@@ -1,6 +1,8 @@
 import "./globals.css";
+import { Suspense } from "react";
 import Navbar from "./components/Home/Navbar";
 import { CartProvider } from "./context/CartContext";
+import { ToastProvider } from "./context/ToastContext";
 import Footer from "./components/Home/Footer";
 // import "./default-responsive.css";
 
@@ -13,13 +15,17 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning className="antialiased">
-        <CartProvider>
-          <Navbar />
-          <div className="w-full mx-auto max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl px-4 sm:px-6 md:px-8 lg:px-12 xl:px-14 2xl:px-16">
-            {children}
-          </div>
-        </CartProvider>
-        <Footer />
+        <ToastProvider>
+          <CartProvider>
+            <Suspense fallback={<div className="h-16 bg-white shadow-sm" />}>
+              <Navbar />
+            </Suspense>
+            <div className="w-full mx-auto max-w-6xl xl:max-w-7xl 2xl:max-w-screen-2xl px-4 sm:px-6 md:px-8 lg:px-12 xl:px-14 2xl:px-16">
+              {children}
+            </div>
+          </CartProvider>
+          <Footer />
+        </ToastProvider>
       </body>
     </html>
   );
